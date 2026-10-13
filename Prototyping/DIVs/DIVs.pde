@@ -36,10 +36,10 @@ void setup() {
   coverX = mmX(95);       coverY = mmY(10);       coverWidth = mmX(77);       coverHeight = mmY(77);
   songX = mmX(67);        songY = mmY(103);       songWidth = mmX(39);        songHeight = mmY(8);
   artistX = mmX(67);      artistY = mmY(114);     artistWidth = mmX(26);      artistHeight = mmY(6);
-  progbarX = mmX(67);     progbarY = mmY(131);    progbarWidth = mmX(130);    progbarHeight = mmY(7);
-  progX = mmX(130);       progY = mmY(120);       progWidth = mmX(7);         progHeight = mmY(13);
-  timeX = mmX(134);       timeY = mmY(134);       timeWidth = mmX(15);        timeHeight = mmY(5);
-  totaltimeX = mmX(182);  totaltimeY = mmY(134);  totaltimeWidth = mmX(15);   totaltimeHeight = mmY(5);
+  progbarX = mmX(67);     progbarY = mmY(131);    progbarWidth = mmX(130);    progbarHeight = mmY(5);
+  progX = mmX(130);       progY = mmY(130);       progWidth = mmX(7);         progHeight = mmY(7);
+  timeX = mmX(67);       timeY = mmY(136);       timeWidth = mmX(15);        timeHeight = mmY(5);
+  totaltimeX = mmX(182);  totaltimeY = mmY(136);  totaltimeWidth = mmX(15);   totaltimeHeight = mmY(5);
 
   stopX = mmX(63);        stopY = mmY(152);       stopWidth = mmX(10);        stopHeight = mmY(10);
   endX = mmX(74);         endY = mmY(152);        endWidth = mmX(10);         endHeight = mmY(10);
