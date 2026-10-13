@@ -2,6 +2,28 @@
 rect(nameX, nameY, nameWidth, nameHeight);
 Copy and Paste, rename
 */
+
+float coverX, coverY, coverWidth, coverHeight;
+float songX, songY, songWidth, songHeight;
+float artistX, artistY, artistWidth, artistHeight;
+float progbarX, progbarY, progbarWidth, progbarHeight;
+float progX, progY, progWidth, progHeight;
+float timeX, timeY, timeWidth, timeHeight;
+float totaltimeX, totaltimeY, totaltimeWidth, totaltimeHeight;
+float endX, endY, endWidth, endHeight;
+float stopX, stopY, stopWidth, stopHeight;
+float prevX, prevY, prevWidth, prevHeight;
+float rewX, rewY, rewWidth, rewHeight;
+float playX, playY, playWidth, playHeight;
+float pauseX, pauseY, pauseWidth, pauseHeight;
+float ffX, ffY, ffWidth, ffHeight;
+float nxtX, nxtY, nxtWidth, nxtHeight;
+float shuffleX, shuffleY, shuffleWidth, shuffleHeight;
+float loopX, loopY, loopWidth, loopHeight;
+float looponeX, looponeY, looponeWidth, looponeHeight;
+float addX, addY, addWidth, addHeight;
+
+
 rect(coverX, coverY, coverWidth, coverHeight);
 rect(songX, songY, songWidth, songHeight);
 rect(artistX, artistY, artistWidth, artistHeight);
