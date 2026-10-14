@@ -3,6 +3,17 @@ rect(nameX, nameY, nameWidth, nameHeight);
 Copy and Paste, rename
 */
 
+import ddf.minim.*;
+
+Minim minim;
+AudioPlayer player;
+
+// Replace with your real file names and info
+String[] files       = { "song1.mp3", "song2.mp3", "song3.mp3" };
+String[] songNames   = { "Song One", "Song Two", "Song Three" };
+String[] artistNames = { "Artist One", "Artist Two", "Artist Three" };
+int current = 0;
+
 float coverX, coverY, coverWidth, coverHeight;
 float songX, songY, songWidth, songHeight;
 float artistX, artistY, artistWidth, artistHeight;
@@ -57,10 +68,30 @@ void setup() {
   loopX = mmX(166);       loopY = mmY(152);       loopWidth = mmX(10);        loopHeight = mmY(10);
   looponeX = mmX(179);    looponeY = mmY(152);    looponeWidth = mmX(10);     looponeHeight = mmY(10);
   addX = mmX(190);        addY = mmY(152);        addWidth = mmX(10);         addHeight = mmY(10);
+    minim = new Minim(this);
+  loadSong(0);
 }
 
 void draw() {
   background(25);
+
+  // What happens when a song finishes
+  if (isPlaying && !player.isPlaying()) {
+    if (loopOneOn) {
+      player.rewind();
+      player.play();
+    } else if (loopOn || shuffleOn || current < files.length - 1) {
+      nextSong();
+    } else {
+      player.rewind();
+      isPlaying = false;
+    }
+  }
+
+  // Move the progress dot
+  float pct = 0;
+  if (player.length() > 0) pct = (float) player.position() / player.length();
+  progX = progbarX + pct * (progbarWidth - progWidth);
 
   // Cover art placeholder
   fill(70);
@@ -71,10 +102,10 @@ void draw() {
   fill(255);
   textAlign(LEFT, CENTER);
   textSize(songHeight * 0.7);
-  text("Song Name", songX, songY + songHeight / 2);
+  text(songNames[current], songX, songY + songHeight / 2);
   fill(180);
   textSize(artistHeight * 0.7);
-  text("Artist Name", artistX, artistY + artistHeight / 2);
+  text(artistNames[current], artistX, artistY + artistHeight / 2);
 
   // Progress bar and dot
   fill(60);
@@ -87,22 +118,22 @@ void draw() {
   fill(200);
   textSize(timeHeight * 0.9);
   textAlign(LEFT, TOP);
-  text("0:00", timeX, timeY);
+  text(formatTime(player.position()), timeX, timeY);
   textAlign(RIGHT, TOP);
-  text("3:45", totaltimeX + totaltimeWidth, totaltimeY);
+  text(formatTime(player.length()), totaltimeX + totaltimeWidth, totaltimeY);
 
   // Buttons
   button("STOP", stopX, stopY, stopWidth, stopHeight);
   button("END", endX, endY, endWidth, endHeight);
   button("PREV", prevX, prevY, prevWidth, prevHeight);
   button("REW", rewX, rewY, rewWidth, rewHeight);
-  button("PLAY", playX, playY, playWidth, playHeight);
-  button("PAUSE", pauseX, pauseY, pauseWidth, pauseHeight);
+  button("PLAY", playX, playY, playWidth, playHeight, isPlaying);
+  button("PAUSE", pauseX, pauseY, pauseWidth, pauseHeight, !isPlaying);
   button("FF", ffX, ffY, ffWidth, ffHeight);
   button("NEXT", nxtX, nxtY, nxtWidth, nxtHeight);
-  button("SHUF", shuffleX, shuffleY, shuffleWidth, shuffleHeight);
-  button("LOOP", loopX, loopY, loopWidth, loopHeight);
-  button("LOOP1", looponeX, looponeY, looponeWidth, looponeHeight);
+  button("SHUF", shuffleX, shuffleY, shuffleWidth, shuffleHeight, shuffleOn);
+  button("LOOP", loopX, loopY, loopWidth, loopHeight, loopOn);
+  button("LOOP1", looponeX, looponeY, looponeWidth, looponeHeight, loopOneOn);
   button("ADD", addX, addY, addWidth, addHeight);
 }
 
@@ -116,7 +147,15 @@ void button(String label, float x, float y, float w, float h) {
   text(label, x + w / 2, y + h / 2);
 }
 
-
+void button(String label, float x, float y, float w, float h, boolean active) {
+  if (active) fill(30, 215, 96); else fill(60);
+  stroke(120);
+  rect(x, y, w, h, 5);
+  fill(active ? 0 : 255);
+  textAlign(CENTER, CENTER);
+  textSize(h * 0.3);
+  text(label, x + w / 2, y + h / 2);
+}
  
 
 boolean over(float x, float y, float w, float h) {
@@ -124,23 +163,64 @@ boolean over(float x, float y, float w, float h) {
 }
 
 void mousePressed() {
-  if (over(playX, playY, playWidth, playHeight))             { isPlaying = true;  println("PLAY"); }
-  if (over(pauseX, pauseY, pauseWidth, pauseHeight))         { isPlaying = false; println("PAUSE"); }
-  if (over(stopX, stopY, stopWidth, stopHeight))             { isPlaying = false; println("STOP"); }
-  if (over(endX, endY, endWidth, endHeight))                 { println("END"); }
-  if (over(prevX, prevY, prevWidth, prevHeight))             { println("PREV"); }
-  if (over(nxtX, nxtY, nxtWidth, nxtHeight))                 { println("NEXT"); }
-  if (over(rewX, rewY, rewWidth, rewHeight))                 { println("REWIND"); }
-  if (over(ffX, ffY, ffWidth, ffHeight))                     { println("FAST FORWARD"); }
-  if (over(addX, addY, addWidth, addHeight))                 { println("ADD SONG"); }
+  if (over(playX, playY, playWidth, playHeight))     { player.play();  isPlaying = true; }
+  if (over(pauseX, pauseY, pauseWidth, pauseHeight)) { player.pause(); isPlaying = false; }
+  if (over(stopX, stopY, stopWidth, stopHeight))     { player.pause(); player.rewind(); isPlaying = false; }
+  if (over(endX, endY, endWidth, endHeight))         { player.cue(max(0, player.length() - 100)); }
+  if (over(prevX, prevY, prevWidth, prevHeight))     { prevSong(); }
+  if (over(nxtX, nxtY, nxtWidth, nxtHeight))         { nextSong(); }
+  if (over(rewX, rewY, rewWidth, rewHeight))         { player.skip(-10000); }   // back 10 sec
+  if (over(ffX, ffY, ffWidth, ffHeight))             { player.skip(10000); }    // forward 10 sec
+  if (over(addX, addY, addWidth, addHeight))         { println("ADD SONG"); }
 
   if (over(shuffleX, shuffleY, shuffleWidth, shuffleHeight)) { shuffleOn = !shuffleOn; }
   if (over(loopX, loopY, loopWidth, loopHeight)) {
     loopOn = !loopOn;
-    if (loopOn) loopOneOn = false;   // only one loop mode at a time
+    if (loopOn) loopOneOn = false;
   }
   if (over(looponeX, looponeY, looponeWidth, looponeHeight)) {
     loopOneOn = !loopOneOn;
     if (loopOneOn) loopOn = false;
   }
+
+  // Click the progress bar to jump to that spot
+  if (over(progbarX, progbarY, progbarWidth, progbarHeight)) {
+    float pct = (mouseX - progbarX) / progbarWidth;
+    player.cue(int(pct * player.length()));
+  }
+}
+
+void loadSong(int i) {
+  boolean wasPlaying = isPlaying;
+  if (player != null) player.close();
+  current = i;
+  player = minim.loadFile(files[current]);
+  isPlaying = false;
+  if (wasPlaying) {
+    player.play();
+    isPlaying = true;
+  }
+}
+
+void nextSong() {
+  if (shuffleOn) {
+    int n = current;
+    while (n == current) n = int(random(files.length));
+    loadSong(n);
+  } else {
+    loadSong((current + 1) % files.length);
+  }
+}
+
+void prevSong() {
+  if (player.position() > 3000) {
+    player.rewind();                       // restart the song if it's been playing a while
+  } else {
+    loadSong((current - 1 + files.length) % files.length);
+  }
+}
+
+String formatTime(int ms) {
+  int s = ms / 1000;
+  return (s / 60) + ":" + nf(s % 60, 2);
 }
