@@ -23,6 +23,10 @@ float loopX, loopY, loopWidth, loopHeight;
 float looponeX, looponeY, looponeWidth, looponeHeight;
 float addX, addY, addWidth, addHeight;
 
+boolean isPlaying = false;
+boolean shuffleOn = false;
+boolean loopOn = false;
+boolean loopOneOn = false;
 
 final float PAPER_W = 280;
 final float PAPER_H = 215;
@@ -51,31 +55,92 @@ void setup() {
   nxtX = mmX(142);        nxtY = mmY(152);        nxtWidth = mmX(10);         nxtHeight = mmY(10);
   shuffleX = mmX(154);    shuffleY = mmY(152);    shuffleWidth = mmX(10);     shuffleHeight = mmY(10);
   loopX = mmX(166);       loopY = mmY(152);       loopWidth = mmX(10);        loopHeight = mmY(10);
-  looponeX = mmX(181);    looponeY = mmY(152);    looponeWidth = mmX(10);     looponeHeight = mmY(10);
+  looponeX = mmX(179);    looponeY = mmY(152);    looponeWidth = mmX(10);     looponeHeight = mmY(10);
   addX = mmX(190);        addY = mmY(152);        addWidth = mmX(10);         addHeight = mmY(10);
 }
 
 void draw() {
-  background(255);
+  background(25);
 
+  // Cover art placeholder
+  fill(70);
+  stroke(120);
   rect(coverX, coverY, coverWidth, coverHeight);
-  rect(songX, songY, songWidth, songHeight);
-  rect(artistX, artistY, artistWidth, artistHeight);
-  rect(progbarX, progbarY, progbarWidth, progbarHeight);
-  rect(progX, progY, progWidth, progHeight);
-  rect(timeX, timeY, timeWidth, timeHeight);
-  rect(totaltimeX, totaltimeY, totaltimeWidth, totaltimeHeight);
 
-  rect(stopX, stopY, stopWidth, stopHeight);
-  rect(endX, endY, endWidth, endHeight);
-  rect(prevX, prevY, prevWidth, prevHeight);
-  rect(rewX, rewY, rewWidth, rewHeight);
-  rect(playX, playY, playWidth, playHeight);
-  rect(pauseX, pauseY, pauseWidth, pauseHeight);
-  rect(ffX, ffY, ffWidth, ffHeight);
-  rect(nxtX, nxtY, nxtWidth, nxtHeight);
-  rect(shuffleX, shuffleY, shuffleWidth, shuffleHeight);
-  rect(loopX, loopY, loopWidth, loopHeight);
-  rect(looponeX, looponeY, looponeWidth, looponeHeight);
-  rect(addX, addY, addWidth, addHeight);
+  // Song and artist text
+  fill(255);
+  textAlign(LEFT, CENTER);
+  textSize(songHeight * 0.7);
+  text("Song Name", songX, songY + songHeight / 2);
+  fill(180);
+  textSize(artistHeight * 0.7);
+  text("Artist Name", artistX, artistY + artistHeight / 2);
+
+  // Progress bar and dot
+  fill(60);
+  noStroke();
+  rect(progbarX, progbarY, progbarWidth, progbarHeight, 4);
+  fill(30, 215, 96);
+  ellipse(progX + progWidth / 2, progY + progHeight / 2, progWidth, progHeight);
+
+  // Times
+  fill(200);
+  textSize(timeHeight * 0.9);
+  textAlign(LEFT, TOP);
+  text("0:00", timeX, timeY);
+  textAlign(RIGHT, TOP);
+  text("3:45", totaltimeX + totaltimeWidth, totaltimeY);
+
+  // Buttons
+  button("STOP", stopX, stopY, stopWidth, stopHeight);
+  button("END", endX, endY, endWidth, endHeight);
+  button("PREV", prevX, prevY, prevWidth, prevHeight);
+  button("REW", rewX, rewY, rewWidth, rewHeight);
+  button("PLAY", playX, playY, playWidth, playHeight);
+  button("PAUSE", pauseX, pauseY, pauseWidth, pauseHeight);
+  button("FF", ffX, ffY, ffWidth, ffHeight);
+  button("NEXT", nxtX, nxtY, nxtWidth, nxtHeight);
+  button("SHUF", shuffleX, shuffleY, shuffleWidth, shuffleHeight);
+  button("LOOP", loopX, loopY, loopWidth, loopHeight);
+  button("LOOP1", looponeX, looponeY, looponeWidth, looponeHeight);
+  button("ADD", addX, addY, addWidth, addHeight);
+}
+
+void button(String label, float x, float y, float w, float h) {
+  fill(60);
+  stroke(120);
+  rect(x, y, w, h, 5);
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(h * 0.3);
+  text(label, x + w / 2, y + h / 2);
+}
+
+
+ 
+
+boolean over(float x, float y, float w, float h) {
+  return mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h;
+}
+
+void mousePressed() {
+  if (over(playX, playY, playWidth, playHeight))             { isPlaying = true;  println("PLAY"); }
+  if (over(pauseX, pauseY, pauseWidth, pauseHeight))         { isPlaying = false; println("PAUSE"); }
+  if (over(stopX, stopY, stopWidth, stopHeight))             { isPlaying = false; println("STOP"); }
+  if (over(endX, endY, endWidth, endHeight))                 { println("END"); }
+  if (over(prevX, prevY, prevWidth, prevHeight))             { println("PREV"); }
+  if (over(nxtX, nxtY, nxtWidth, nxtHeight))                 { println("NEXT"); }
+  if (over(rewX, rewY, rewWidth, rewHeight))                 { println("REWIND"); }
+  if (over(ffX, ffY, ffWidth, ffHeight))                     { println("FAST FORWARD"); }
+  if (over(addX, addY, addWidth, addHeight))                 { println("ADD SONG"); }
+
+  if (over(shuffleX, shuffleY, shuffleWidth, shuffleHeight)) { shuffleOn = !shuffleOn; }
+  if (over(loopX, loopY, loopWidth, loopHeight)) {
+    loopOn = !loopOn;
+    if (loopOn) loopOneOn = false;   // only one loop mode at a time
+  }
+  if (over(looponeX, looponeY, looponeWidth, looponeHeight)) {
+    loopOneOn = !loopOneOn;
+    if (loopOneOn) loopOn = false;
+  }
 }
