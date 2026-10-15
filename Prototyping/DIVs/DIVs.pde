@@ -8,11 +8,16 @@ import ddf.minim.*;
 Minim minim;
 AudioPlayer player;
 
+String pendingFile = null;
+
 // Replace with your real file names and info
-String[] files       = { "song1.mp3", "song2.mp3", "song3.mp3" };
-String[] songNames   = { "Song One", "Song Two", "Song Three" };
-String[] artistNames = { "Artist One", "Artist Two", "Artist Three" };
+String[] files       = { "IRIS OUT - Kenshi Yonezu.mp3", "Life Will Change - Lyn.mp3", "Super Miriam - Airdorf Games.mp3", "Deal With The Devil - Tia.mp3" };
+String[] songNames   = { "IRIS OUT", "LIFE WILL CHANGE", "SUPER MIRIAM", "DEAL WITH THE DEVIL" };
+String[] artistNames = { "Kenshi Yonezu", "Lyn", "Airdorf Games", "Tia" };
 int current = 0;
+
+PImage[] covers;
+String[] coverFiles = { "IRIS OUT - Kenshi Yonezu.png", "Life Will Change - Lyn.png", "Super Miriam - Airdorf Games.png", "Deal With The Devil - Tia.png" };
 
 float coverX, coverY, coverWidth, coverHeight;
 float songX, songY, songWidth, songHeight;
@@ -70,10 +75,22 @@ void setup() {
   addX = mmX(190);        addY = mmY(152);        addWidth = mmX(10);         addHeight = mmY(10);
     minim = new Minim(this);
   loadSong(0);
+    covers = new PImage[coverFiles.length];
+  for (int i = 0; i < coverFiles.length; i++) {
+    covers[i] = loadImage(coverFiles[i]);
+  }
+    for (int i = 0; i < coverFiles.length; i++) {
+    covers[i] = loadImage(coverFiles[i]);
+  }
 }
 
 void draw() {
   background(25);
+
+  if (pendingFile != null) {
+    addSong(pendingFile);
+    pendingFile = null;
+  }
 
   // What happens when a song finishes
   if (isPlaying && !player.isPlaying()) {
@@ -93,10 +110,14 @@ void draw() {
   if (player.length() > 0) pct = (float) player.position() / player.length();
   progX = progbarX + pct * (progbarWidth - progWidth);
 
-  // Cover art placeholder
-  fill(70);
-  stroke(120);
-  rect(coverX, coverY, coverWidth, coverHeight);
+    // Cover art
+  if (covers[current] != null) {
+    image(covers[current], coverX, coverY, coverWidth, coverHeight);
+  } else {
+    fill(70);
+    stroke(120);
+    rect(coverX, coverY, coverWidth, coverHeight);   // fallback if an image is missing
+  }
 
   // Song and artist text
   fill(255);
@@ -171,8 +192,8 @@ void mousePressed() {
   if (over(nxtX, nxtY, nxtWidth, nxtHeight))         { nextSong(); }
   if (over(rewX, rewY, rewWidth, rewHeight))         { player.skip(-10000); }   // back 10 sec
   if (over(ffX, ffY, ffWidth, ffHeight))             { player.skip(10000); }    // forward 10 sec
-  if (over(addX, addY, addWidth, addHeight))         { println("ADD SONG"); }
-
+  if (over(addX, addY, addWidth, addHeight))         { selectInput("Choose a song (.mp3)", "fileSelected"); }
+  
   if (over(shuffleX, shuffleY, shuffleWidth, shuffleHeight)) { shuffleOn = !shuffleOn; }
   if (over(loopX, loopY, loopWidth, loopHeight)) {
     loopOn = !loopOn;
@@ -223,4 +244,30 @@ void prevSong() {
 String formatTime(int ms) {
   int s = ms / 1000;
   return (s / 60) + ":" + nf(s % 60, 2);
+}
+
+// Runs when the user picks a file (or cancels)
+void fileSelected(File selection) {
+  if (selection != null) pendingFile = selection.getAbsolutePath();
+}
+
+void addSong(String path) {
+  String name = new File(path).getName();
+  String lower = name.toLowerCase();
+
+  // Only accept audio files Minim can play
+  if (!(lower.endsWith(".mp3") || lower.endsWith(".wav"))) {
+    println("Not a supported audio file: " + name);
+    return;
+  }
+
+  // Remove the file extension for the display name
+  name = name.substring(0, name.lastIndexOf('.'));
+
+  files = append(files, path);
+  songNames = append(songNames, name);
+  artistNames = append(artistNames, "Unknown Artist");
+  covers = (PImage[]) expand(covers, covers.length + 1);   // new slot stays empty (null)
+
+  loadSong(files.length - 1);   // jump to the new song
 }
